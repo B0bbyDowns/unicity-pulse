@@ -383,7 +383,7 @@
   fetch("data.json?_="+Date.now()).then(function(r){ return r.json(); })
     .then(function(d){ STATE.data=d; render(); })
     .catch(function(){ STATE.data={history:[]}; render(); })
-    .finally(function(){ liveCheck(); setInterval(liveCheck, 60000); });
+    .finally(function(){ liveCheck(); setInterval(liveCheck, 30000); });
 })();
 </script>
 </body>
