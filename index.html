@@ -58,14 +58,10 @@
   .oneliner b{color:var(--fg);font-weight:600}
 
   /* advanced */
-  .adv-toggle{display:flex;align-items:center;gap:10px;width:100%;margin:26px 0 4px;
-    background:none;border:none;color:var(--muted);font-family:var(--mono);font-size:12px;
-    letter-spacing:.08em;text-transform:uppercase;cursor:pointer;padding:8px 0}
-  .adv-toggle:hover{color:var(--fg)}
-  .adv-toggle .chev{transition:transform .2s;display:inline-block}
-  .adv-toggle[aria-expanded="true"] .chev{transform:rotate(90deg)}
-  .adv-toggle .rule{flex:1;height:1px;background:var(--line)}
-  .adv[hidden]{display:none}
+  .adv-divider{display:flex;align-items:center;gap:10px;margin:26px 0 4px;
+    color:var(--muted);font-family:var(--mono);font-size:12px;
+    letter-spacing:.08em;text-transform:uppercase;padding:8px 0}
+  .adv-divider .rule{flex:1;height:1px;background:var(--line)}
   .adv{padding-top:14px}
 
   .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
@@ -149,11 +145,9 @@
   <p class="oneliner" id="oneliner"></p>
 
   <!-- ADVANCED -->
-  <button class="adv-toggle" id="advToggle" aria-expanded="false">
-    <span class="chev">▸</span> Advanced <span class="rule"></span>
-  </button>
+  <div class="adv-divider">Advanced <span class="rule"></span></div>
 
-  <div class="adv" id="adv" hidden>
+  <div class="adv" id="adv">
     <div class="chips" id="chips"></div>
 
     <div class="sect-h">Shards <span class="hint">each produces blocks independently</span></div>
@@ -386,12 +380,6 @@
   }
 
   // ---- boot ----
-  $("advToggle").addEventListener("click", function(){
-    var exp = this.getAttribute("aria-expanded")==="true";
-    this.setAttribute("aria-expanded", String(!exp));
-    $("adv").hidden = exp;
-  });
-
   fetch("data.json?_="+Date.now()).then(function(r){ return r.json(); })
     .then(function(d){ STATE.data=d; render(); })
     .catch(function(){ STATE.data={history:[]}; render(); })
