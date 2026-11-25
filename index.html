@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Unicity Pulse</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" />
+<style>
+  :root{
+    --bg:#0a0a0b; --panel:#141315; --panel2:#1a181c; --line:#2a2830;
+    --fg:#edecea; --muted:#8f8b86; --faint:#6b6760;
+    --accent:#ff7a1a; --live:#a3e635; --crit:#ef4444; --info:#60a5fa;
+    color-scheme:dark;
+    --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+    --disp:'Space Grotesk',system-ui,sans-serif;
+    --body:'Inter',system-ui,-apple-system,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:var(--bg); color:var(--fg); font-family:var(--body);
+    font-size:15px; line-height:1.5; -webkit-font-smoothing:antialiased;
+    padding-left:max(18px,env(safe-area-inset-left,0px));
+    padding-right:max(18px,env(safe-area-inset-right,0px));
+    padding-bottom:calc(40px + env(safe-area-inset-bottom,0px));
+  }
+  .wrap{max-width:860px;margin:0 auto}
+
+  /* header */
+  header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+    padding-top:calc(22px + env(safe-area-inset-top,0px));padding-bottom:10px}
+  .brand{display:flex;align-items:baseline;gap:10px;min-width:0}
+  .logo{font-family:var(--disp);font-weight:700;font-size:21px;letter-spacing:-.02em}
+  .logo .dot{color:var(--accent)}
+  .sub{font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+  .live{margin-left:auto;display:inline-flex;align-items:center;gap:7px;
+    font-family:var(--mono);font-size:12px;color:var(--live);
+    border:1px solid color-mix(in srgb,var(--live) 35%,transparent);
+    border-radius:999px;padding:5px 11px;background:color-mix(in srgb,var(--live) 8%,transparent)}
+  .live.stale{color:var(--muted);border-color:var(--line);background:transparent}
+  .live .pip{width:8px;height:8px;border-radius:50%;background:currentColor;box-shadow:0 0 0 0 currentColor;animation:pulse 2s infinite}
+  .live.stale .pip{animation:none}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--live) 70%,transparent)}70%{box-shadow:0 0 0 7px transparent}100%{box-shadow:0 0 0 0 transparent}}
+
+  .note{font-size:12.5px;color:var(--faint);margin:0 0 20px;line-height:1.45}
+
+  /* simple cards */
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:8px}
+  .scard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 18px 16px}
+  .scard .q{font-size:13px;color:var(--muted);margin-bottom:12px;font-weight:500}
+  .scard .a{font-family:var(--disp);font-weight:600;font-size:26px;letter-spacing:-.02em;line-height:1.1}
+  .scard .a.ok{color:var(--live)} .scard .a.warn{color:var(--accent)} .scard .a.bad{color:var(--crit)}
+  .scard .meta{font-family:var(--mono);font-size:12px;color:var(--faint);margin-top:8px}
+
+  .oneliner{font-size:14px;color:var(--muted);margin:16px 2px 4px;line-height:1.5}
+  .oneliner b{color:var(--fg);font-weight:600}
+
+  /* advanced */
+  .adv-toggle{display:flex;align-items:center;gap:10px;width:100%;margin:26px 0 4px;
+    background:none;border:none;color:var(--muted);font-family:var(--mono);font-size:12px;
+    letter-spacing:.08em;text-transform:uppercase;cursor:pointer;padding:8px 0}
+  .adv-toggle:hover{color:var(--fg)}
+  .adv-toggle .chev{transition:transform .2s;display:inline-block}
+  .adv-toggle[aria-expanded="true"] .chev{transform:rotate(90deg)}
+  .adv-toggle .rule{flex:1;height:1px;background:var(--line)}
+  .adv[hidden]{display:none}
+  .adv{padding-top:14px}
+
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+  .chip{font-family:var(--mono);font-size:12px;color:var(--muted);background:var(--panel2);
+    border:1px solid var(--line);border-radius:8px;padding:7px 11px}
+  .chip b{color:var(--fg);font-weight:500}
+
+  .sect-h{font-family:var(--disp);font-size:13px;font-weight:600;letter-spacing:.02em;
+    color:var(--fg);margin:22px 0 10px;text-transform:uppercase}
+  .sect-h .hint{font-family:var(--body);font-weight:400;text-transform:none;color:var(--faint);font-size:12px;margin-left:8px;letter-spacing:0}
+
+  /* shards */
+  .shards{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+  .shard{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}
+  .shard .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+  .shard .name{font-family:var(--disp);font-weight:600;font-size:14px}
+  .shard .name small{color:var(--faint);font-family:var(--mono);font-weight:400;font-size:11px;margin-left:6px}
+  .pill{font-family:var(--mono);font-size:10.5px;padding:3px 8px;border-radius:999px;letter-spacing:.03em}
+  .pill.ok{color:var(--live);background:color-mix(in srgb,var(--live) 12%,transparent)}
+  .pill.bad{color:var(--crit);background:color-mix(in srgb,var(--crit) 14%,transparent)}
+  .shard .h{font-family:var(--mono);font-size:19px;color:var(--fg);letter-spacing:-.01em}
+  .shard .kv{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11.5px;color:var(--faint);margin-top:6px}
+  .shard .kv span:last-child{color:var(--muted)}
+  .hash{font-family:var(--mono);font-size:10.5px;color:var(--faint);margin-top:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+  /* chart */
+  .chartcard{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 14px 12px;margin-top:4px}
+  .chart-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:6px}
+  .legend{display:flex;flex-wrap:wrap;gap:12px}
+  .legend span{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--muted)}
+  .legend i{width:12px;height:3px;border-radius:2px;display:inline-block}
+  .chart-wrap{overflow-x:auto}
+  svg.chart{display:block;width:100%;height:220px;min-width:280px}
+  .chart-empty{color:var(--faint);font-family:var(--mono);font-size:12px;text-align:center;padding:60px 0}
+  .axis{fill:var(--faint);font-family:var(--mono);font-size:10px}
+  .grid{stroke:var(--line);stroke-width:1}
+
+  footer{margin-top:30px;padding-top:16px;border-top:1px solid var(--line);
+    font-size:12px;color:var(--faint);line-height:1.6}
+  footer a{color:var(--muted)}
+  footer .row{display:flex;flex-wrap:wrap;gap:4px 16px;margin-bottom:6px;font-family:var(--mono)}
+
+  @media(max-width:620px){
+    .cards{grid-template-columns:1fr}
+    .shards{grid-template-columns:1fr}
+    .scard .a{font-size:24px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <span class="logo">Unicity<span class="dot">.</span>Pulse</span>
+      <span class="sub">Network · Mainnet</span>
+    </div>
+    <span class="live stale" id="liveBadge"><span class="pip"></span><span id="liveText">connecting…</span></span>
+  </header>
+
+  <p class="note">Community-run liveness &amp; usage tracker for the Unicity alpha mainnet. Reads directly from the public gateway and keeps a running history, so the growth over time is here even if you just opened the page. Not affiliated with Unicity Labs.</p>
+
+  <!-- SIMPLE VIEW -->
+  <div class="cards">
+    <div class="scard">
+      <div class="q">Is the chain alive?</div>
+      <div class="a" id="aliveA">—</div>
+      <div class="meta" id="aliveM"></div>
+    </div>
+    <div class="scard">
+      <div class="q">Any activity right now?</div>
+      <div class="a" id="actA">—</div>
+      <div class="meta" id="actM"></div>
+    </div>
+    <div class="scard">
+      <div class="q">Is it healthy?</div>
+      <div class="a" id="healthA">—</div>
+      <div class="meta" id="healthM"></div>
+    </div>
+  </div>
+
+  <p class="oneliner" id="oneliner"></p>
+
+  <!-- ADVANCED -->
+  <button class="adv-toggle" id="advToggle" aria-expanded="false">
+    <span class="chev">▸</span> Advanced <span class="rule"></span>
+  </button>
+
+  <div class="adv" id="adv" hidden>
+    <div class="chips" id="chips"></div>
+
+    <div class="sect-h">Shards <span class="hint">each produces blocks independently</span></div>
+    <div class="shards" id="shards"></div>
+
+    <div class="sect-h">Growth over time <span class="hint">blocks produced since tracking began</span></div>
+    <div class="chartcard">
+      <div class="chart-head">
+        <div class="legend" id="legend"></div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--faint)" id="chartRange"></div>
+      </div>
+      <div class="chart-wrap"><svg class="chart" id="chart" preserveAspectRatio="none"></svg></div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="row">
+      <span>gateway: <span id="fGateway">gateway.mainnet.unicity.network</span></span>
+      <span>shards: <span id="fShards">00 · 01 · 10 · 11</span></span>
+    </div>
+    <div class="row">
+      <span id="fUpdated">history updated: —</span>
+      <span id="fLive">live check: —</span>
+    </div>
+    <div>Sampled every ~30 min by a GitHub Action; the page also pings the gateway live when you open it. Block times and heights are on-chain data; "activity" counts commitments (state transitions) in the latest block of each shard.</div>
+  </footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var GATEWAY = "https://gateway.mainnet.unicity.network/";
+  var SHARD_COLORS = { "00":"#ff7a1a", "01":"#a3e635", "10":"#60a5fa", "11":"#c084fc" };
+  var $ = function(id){ return document.getElementById(id); };
+
+  function fmt(n){ return (n==null||!isFinite(n)) ? "—" : Number(n).toLocaleString("en-US"); }
+  function ago(ms){
+    if(ms==null||!isFinite(ms)) return "—";
+    var s = Math.max(0, Math.round(ms/1000));
+    if(s<90) return s+"s ago";
+    var m = Math.round(s/60); if(m<90) return m+"m ago";
+    var h = Math.round(m/60); if(h<48) return h+"h ago";
+    return Math.round(h/24)+"d ago";
+  }
+  function shortHash(h){ return h ? h.slice(0,8)+"…"+h.slice(-6) : "—"; }
+
+  var STATE = { data:null, shardOrder:["00","01","10","11"], live:null };
+
+  // ---- rendering ----
+  function render(){
+    var d = STATE.data || {};
+    var order = (d.shardOrder && d.shardOrder.length) ? d.shardOrder : STATE.shardOrder;
+    STATE.shardOrder = order;
+    // Prefer live snapshot for "now" numbers; fall back to the logged latest.
+    var latest = d.latest || null;
+    var nowShards = STATE.live || (latest && latest.shards) || {};
+    var now = Date.now();
+
+    // health
+    var ok = 0, total = order.length, newestBlockAge = Infinity, tallest = 0;
+    order.forEach(function(s){
+      var r = nowShards[s];
+      if(r && isFinite(r.index)){
+        ok++;
+        if(isFinite(r.createdAt)) newestBlockAge = Math.min(newestBlockAge, now - r.createdAt);
+        tallest = Math.max(tallest, r.index);
+      }
+    });
+
+    // throughput (blocks/sec) from last two distinct history records
+    var tp = throughput(d.history, order);
+
+    // alive card
+    var alive = ok > 0;
+    setCard("alive", alive ? "Yes" : "No", alive ? "ok" : "bad",
+      alive ? ("last block "+ago(newestBlockAge===Infinity?null:newestBlockAge)) : "no shards responding");
+
+    // activity card — commitments in the latest blocks across shards
+    var com = 0; order.forEach(function(s){ var r=nowShards[s]; if(r&&isFinite(r.commitments)) com+=r.commitments; });
+    if(com>0) setCard("act", fmt(com), "warn", "commitments in latest blocks");
+    else setCard("act", "Quiet", "", "0 commitments in latest blocks");
+
+    // health card
+    if(ok===total && total>0) setCard("health","Yes","ok", total+"/"+total+" shards producing");
+    else if(ok>0) setCard("health", ok+"/"+total, "warn", "some shards not responding");
+    else setCard("health","No","bad","gateway unreachable");
+
+    // one-liner
+    var tpTxt = tp.rate>0 ? ("about <b>"+tp.rate.toFixed(2)+" blocks/sec</b> across the network ("+(1/tp.rate).toFixed(2)+"s per block)") : "throughput will show once two samples are in";
+    $("oneliner").innerHTML = alive
+      ? ("The chain is live across <b>"+ok+" of "+total+"</b> shards, producing "+tpTxt+". Tallest shard is at block <b>"+fmt(tallest)+"</b>.")
+      : "Can't reach the gateway right now — showing the last recorded history below.";
+
+    // live badge
+    var badge = $("liveBadge"), txt = $("liveText");
+    if(STATE.live){ badge.className="live"; txt.textContent="live"; }
+    else if(alive){ badge.className="live"; txt.textContent="recorded"; }
+    else { badge.className="live stale"; txt.textContent="offline"; }
+
+    // chips
+    var chips = [
+      ["shards", ok+"/"+total],
+      ["throughput", tp.rate>0 ? tp.rate.toFixed(2)+" blk/s" : "—"],
+      ["block time", tp.rate>0 ? (1/tp.rate).toFixed(2)+"s" : "—"],
+      ["tallest shard", "#"+fmt(tallest)],
+      ["commitments (latest)", fmt(com)]
+    ];
+    $("chips").innerHTML = chips.map(function(c){ return '<span class="chip">'+c[0]+' <b>'+c[1]+'</b></span>'; }).join("");
+
+    // shards
+    $("shards").innerHTML = order.map(function(s,i){
+      var r = nowShards[s] || {};
+      var up = isFinite(r.index);
+      var age = (up && isFinite(r.createdAt)) ? ago(now - r.createdAt) : "—";
+      return '<div class="shard">'
+        +'<div class="top"><span class="name">S'+i+' <small>prefix '+s+'</small></span>'
+        +'<span class="pill '+(up?'ok':'bad')+'">'+(up?'producing':'no data')+'</span></div>'
+        +'<div class="h">#'+(up?fmt(r.index):"—")+'</div>'
+        +'<div class="kv"><span>last block</span><span>'+age+'</span></div>'
+        +'<div class="kv"><span>commitments</span><span>'+(up?fmt(r.commitments):"—")+'</span></div>'
+        +'<div class="hash">'+(up?shortHash(r.rootHash):"—")+'</div>'
+        +'</div>';
+    }).join("");
+
+    // footer
+    if(d.gateway) $("fGateway").textContent = d.gateway.replace(/^https?:\/\//,"").replace(/\/$/,"");
+    $("fShards").textContent = order.join(" · ");
+    $("fUpdated").textContent = "history updated: " + (latest && latest.t ? ago(now-latest.t) : "—");
+    $("fLive").textContent = "live check: " + (STATE.live ? "just now" : "unavailable");
+
+    drawChart(d.history, order);
+  }
+
+  function setCard(key, a, cls, meta){
+    var el = $(key+"A"); el.textContent = a; el.className = "a" + (cls?(" "+cls):"");
+    $(key+"M").textContent = meta || "";
+  }
+
+  function throughput(history, order){
+    if(!history || history.length < 2) return { rate:0 };
+    var b = history[history.length-1], a = history[history.length-2];
+    var dt = (b.t - a.t)/1000;
+    if(dt<=0) return { rate:0 };
+    var sum = 0, any=false;
+    order.forEach(function(s){
+      if(Array.isArray(b[s]) && Array.isArray(a[s])){
+        var d = b[s][0]-a[s][0];
+        if(d>=0){ sum += d; any=true; }
+      }
+    });
+    return { rate: any ? sum/dt : 0 };
+  }
+
+  // ---- SVG chart: blocks produced since first sample, per shard ----
+  function drawChart(history, order){
+    var svg = $("chart");
+    while(svg.firstChild) svg.removeChild(svg.firstChild);
+    if(!history || history.length < 2){
+      svg.innerHTML = '<text x="50%" y="50%" text-anchor="middle" class="axis" dy="4">collecting data — the line appears after the second sample</text>';
+      $("legend").innerHTML=""; $("chartRange").textContent=""; return;
+    }
+    var W=820, H=220, padL=48, padR=12, padT=12, padB=24;
+    svg.setAttribute("viewBox","0 0 "+W+" "+H);
+
+    // baseline per shard = first finite index seen
+    var base={}, series={};
+    order.forEach(function(s){ series[s]=[]; });
+    history.forEach(function(rec){
+      order.forEach(function(s){
+        var v = Array.isArray(rec[s]) ? rec[s][0] : null;
+        if(v!=null && isFinite(v)){
+          if(base[s]==null) base[s]=v;
+          series[s].push([rec.t, v-base[s]]);
+        }
+      });
+    });
+
+    var t0=history[0].t, t1=history[history.length-1].t;
+    var maxY=1;
+    order.forEach(function(s){ series[s].forEach(function(p){ if(p[1]>maxY) maxY=p[1]; }); });
+    maxY = niceCeil(maxY);
+
+    var x=function(t){ return padL + (W-padL-padR)*( (t-t0)/Math.max(1,(t1-t0)) ); };
+    var y=function(v){ return H-padB - (H-padT-padB)*( v/maxY ); };
+
+    var g="";
+    // gridlines + y labels
+    for(var i=0;i<=4;i++){
+      var yv=maxY*i/4, yy=y(yv);
+      g+='<line class="grid" x1="'+padL+'" y1="'+yy+'" x2="'+(W-padR)+'" y2="'+yy+'"/>';
+      g+='<text class="axis" x="'+(padL-6)+'" y="'+(yy+3)+'" text-anchor="end">'+fmt(Math.round(yv))+'</text>';
+    }
+    // x labels (start / end)
+    g+='<text class="axis" x="'+padL+'" y="'+(H-6)+'" text-anchor="start">'+dateLbl(t0)+'</text>';
+    g+='<text class="axis" x="'+(W-padR)+'" y="'+(H-6)+'" text-anchor="end">'+dateLbl(t1)+'</text>';
+    // lines
+    order.forEach(function(s){
+      var pts=series[s]; if(pts.length<2) return;
+      var dpath=pts.map(function(p,i){ return (i?"L":"M")+x(p[0]).toFixed(1)+" "+y(p[1]).toFixed(1); }).join(" ");
+      g+='<path d="'+dpath+'" fill="none" stroke="'+(SHARD_COLORS[s]||"#888")+'" stroke-width="1.8" stroke-linejoin="round"/>';
+    });
+    svg.innerHTML=g;
+
+    $("legend").innerHTML = order.map(function(s,i){
+      return '<span><i style="background:'+(SHARD_COLORS[s]||"#888")+'"></i>S'+i+' ('+s+')</span>';
+    }).join("");
+    $("chartRange").textContent = fmt(history.length)+" samples · "+dateLbl(t0)+" → "+dateLbl(t1);
+  }
+  function niceCeil(v){ if(v<=5) return 5; var p=Math.pow(10,Math.floor(Math.log10(v))); var n=v/p; var m=n<=1?1:n<=2?2:n<=5?5:10; return m*p; }
+  function dateLbl(t){ var d=new Date(t); return d.toLocaleDateString("en-AU",{day:"numeric",month:"short"})+" "+d.toLocaleTimeString("en-AU",{hour:"2-digit",minute:"2-digit"}); }
+
+  // ---- live refresh straight from the gateway (CORS permitting) ----
+  function liveCheck(){
+    var order = STATE.shardOrder;
+    Promise.all(order.map(function(s,i){
+      return fetch(GATEWAY,{method:"POST",headers:{"content-type":"application/json"},
+        body:JSON.stringify({jsonrpc:"2.0",id:i+1,method:"get_block",params:{blockNumber:"latest",shardId:s}})})
+        .then(function(r){ return r.ok?r.json():null; })
+        .then(function(j){
+          if(!j||!j.result||!j.result.block) return null;
+          var b=j.result.block;
+          return { shard:s, index:Number(b.index), createdAt:Number(b.createdAt),
+                   commitments:Number(j.result.totalCommitments||0), rootHash:b.rootHash||"" };
+        }).catch(function(){ return null; });
+    })).then(function(results){
+      var snap={}, any=false;
+      results.forEach(function(r){ if(r){ snap[r.shard]=r; any=true; } });
+      if(any){ STATE.live = snap; render(); }
+    });
+  }
+
+  // ---- boot ----
+  $("advToggle").addEventListener("click", function(){
+    var exp = this.getAttribute("aria-expanded")==="true";
+    this.setAttribute("aria-expanded", String(!exp));
+    $("adv").hidden = exp;
+  });
+
+  fetch("data.json?_="+Date.now()).then(function(r){ return r.json(); })
+    .then(function(d){ STATE.data=d; render(); })
+    .catch(function(){ STATE.data={history:[]}; render(); })
+    .finally(function(){ liveCheck(); setInterval(liveCheck, 60000); });
+})();
+</script>
+</body>
+</html>
